@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--指定properties文件的位置，从类路径根(target/classes)开始找文件-->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--settings:控制mybatis全局行为-->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor" />
+    </plugins>
+
+    <environments default="development">
+
+        <environment id="development">
+            <!--以后这些也都不用，用druid-->
+            <!--
+                transactionManager:mybatis提交事务，回顾事务的方式
+                type:事务的处理的类型
+                1）JDBC(表示使用jdbc中的Connection对象的commit,rollback做事务处理)
+                2）MANAGED:把mybatis的事务处理委托给其他的容器(eg:一个服务器软件，一个框架(spring))
+            -->
+            <transactionManager type="JDBC"/>
+            <!--
+                dataSource:表示数据源，连接数据库的,java体系中，规定实现了javax.sql.DataSource接口的都是数据源
+                            数据源表示Connection对象的
+                type:表示数据源的类型，
+                1）POOLED：使用连接池,mybatis会创建PooledDataSource类
+                2）UPOOLED:不使用连接池，在每次执行sql语句，先创建连接，执行sql,再关闭连接
+                          mybatis会创建一个UnPooledDataSource,管理Connection对象的使用
+                3)JNDI:java命名和目录服务(windows注册表(维护了windows中所有可能用到的服务)（我们到这里去找需要用的服务）)
+            -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.user}"/>
+                <property name="password" value="${jdbc.passwd}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <mappers>
+        <mapper resource="ncu/chenyuhan/dao/StudentDao.xml"/>
+    </mappers>
+</configuration>
