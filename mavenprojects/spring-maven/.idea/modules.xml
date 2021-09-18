@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../mybatis-maven/mybatis-maven.iml" filepath="$PROJECT_DIR$/../mybatis-maven/mybatis-maven.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-di-xml-anno/spring-di-xml.iml" filepath="$PROJECT_DIR$/../spring-di-xml-anno/spring-di-xml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-maven.iml" filepath="$PROJECT_DIR$/spring-maven.iml" />
+    </modules>
+  </component>
+</project>
