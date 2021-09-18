@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--指定properties文件的位置，从类路径根(target/classes)开始找文件-->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--settings:控制mybatis全局行为-->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor" />
+    </plugins>
+
+    <environments default="development">
+
+        <environment id="development">
+
+            <transactionManager type="JDBC"/>
+            <!--
+                dataSource:表示数据源，连接数据库的
+                type:表示数据源的类型，POOLED表示使用连接池
+            -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.user}"/>
+                <property name="password" value="${jdbc.passwd}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <!--一个mapper标签指定一个文件的位置
+            从类路径开始的路径信息。 target/classes(类路径)
+        -->
+        <!--第一种方式：指定多个mapper文件-->
+        <mapper resource="ncu/chenyuhan/dao/StudentDao.xml"/>
+        <!--第二种方式：使用包名
+            name:xml文件(mapper文件)所在的包名，这个包名所有xml文件一次都能加载给mybatis
+            使用package的要求：
+            1.mapper文件名称需要和接口名称一样，区分大小写的一样
+            2.mapper文件和dao接口需要在同一目录
+        -->
+        <package name="ncu.chenyuhan.dao"/>
+    </mappers>
+</configuration>

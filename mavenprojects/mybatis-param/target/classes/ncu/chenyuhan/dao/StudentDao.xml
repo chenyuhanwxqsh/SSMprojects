@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ncu.chenyuhan.dao.StudentDao">
+
+    <!--
+        select:表示查询操作
+        id:你要执行的sql语法的唯一标识，mybatis会使用这个id的值来找到要执行的sql语句，
+        可以自定义，但是要求使用接口中的方法名称
+        resultType:表示结果类型的，是sql语句执行后得到ResultSet,遍历这个ResultSet得到java对象的类型
+            其中的值写的类型的全限定名称
+    -->
+
+    <!--
+        parameterType:dao接口中方法参数的数据类型
+          parameterType它的值是java的数据类型全限定名称或者是mybatis定义的别名
+          eg:parameterType="java.lang.Integer"
+             parameterType="int"
+          注意：parameterType不是强制的，mybatis通过反射机制能够发现接口参数的数据类型
+             所以可以没有，一般我们也不会写
+
+          //只是在mybatis内部完成的
+         使用#{}之后，mybatis执行sql是使用的jdbc中的PreparedStatement对象
+         由mybatis执行下面的代码：
+           1.mybatis创建Connection,PreparedStatement对象
+             String sql="select id,name,email,age from student where id=?";
+             PreparedStatement pst=conn.preparedStatement(sql);
+             pst.setInt(1,1001);
+
+           2.执行sql封装为resultType="ncu.chenyuhan.domain.Student"这个对象
+             ResultSet rs=ps.executeQuery();
+             Student student =null;
+             while(rs.next()){
+                //从数据库取表的一行数据，存到一个java对象属性中
+                 student =new Student(rs.getInt(id),rs.getString("name"),rs.getString("email"),rs.getInt("age"));
+             }
+             return student;//赋给了dao方法调用的返回值
+    -->
+
+    <select id="selectStudentById" parameterType="java.lang.Integer" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where id=#{id}
+    </select>
+
+    <!--多个参数，使用@Param命名-->
+    <select id="selectMultiParam" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where name=#{myname} or age=#{myage}
+    </select>
+
+    <!--多个参数，使用java对象的属性值，作为参数实际值
+        使用对象语法：#{属性名，javaType=类型名称,jdbcType=数据类型} 很少用
+        javaType:指java中的属性数据类型
+        jdbcType:在数据库中的数据类型
+        eg:#{paramName,javaType=java.lang.String,jdbcType=VARCHAR}
+
+        我们使用的简化方式：#{属性名} ,javaType,jdbcType的值mybatis反射能获取，不用提供
+    -->
+    <select id="selectMultiObject" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where name=#{paramName} or age=#{paramAge}
+    </select>
+
+    <!--多个参数使用位置-->
+    <select id="selectMultiPosition" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where name=#{arg0} or age=#{arg1}
+    </select>
+
+    <!--多个参数，使用Map,使用语法#{map的key}-->
+    <select id="selectMultiByMap" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where
+            name=#{myname} or age=#{myage}
+    </select>
+
+    <!--$替换列名-->
+    <select id="selectUse$order" resultType="ncu.chenyuhan.domain.Student">
+        select * from student order by ${colName}
+    </select>
+
+    <!--返回Map--><!--map是别名，或者使用java.lang.Integer也行-->
+    <!--列名是map的key,列值是map的value-->
+    <!--map返回的结果只能是一行,否则会报错-->
+    <select id="selectMapById" resultType="map">
+        select id,name,email from student where id=#{stuid}
+    </select>
+
+    <!--使用resultMap
+       1)先定义resultMap  2)在select标签，使用resultMap来引用1定义的
+    -->
+    <!--定义resultMap
+         id:自定义名称，表示你定义的这个resultMap
+         type:java类型的全限定名称
+    -->
+    <resultMap id="studentMap" type="ncu.chenyuhan.domain.Student">
+        <!--列名和java属性的关系-->
+        <!--主键列，使用id标签
+            column:列名
+            property:java类型的属性名
+        -->
+        <id column="id" property="id"/>
+        <!--非主键列，使用result-->
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+    </resultMap>
+
+    <!--定义sql片段-->
+    <sql id="studentSql">
+        select id,name,age,email from student
+    </sql>
+
+    <select id="selectAllStudents" resultMap="studentMap">
+        <include refid="studentSql"></include>
+    </select>
+
+    <!--第一种like,java代码指定like的内容-->
+    <select id="selectLikeOne" resultType="ncu.chenyuhan.domain.Student">
+        <include refid="studentSql"></include> where name like #{name}
+    </select>
+
+    <!--第二种：在mapper文件中拼接like的内容-->
+    <select id="selectLikeTwo" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student where name like "%" #{name} "%"
+    </select>
+
+    <!--if
+        <if:test="使用参数java对象的属性值作为判断条件，语法  属性=XXX值">
+    -->
+    <select id="selectStudentIf" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,age,email from student
+        where 1=1
+        <if test="name!=null and name!='' ">
+            and name=#{name}
+        </if>
+        <if test="age>0">
+            and age > #{age}
+        </if>
+    </select>
+
+    <!-- where :<where> <if>  <if>  ...</where>
+    -->
+    <select id="selectStudentWhere" resultType="ncu.chenyuhan.domain.Student">
+        select id,name,email,age from student
+        <where>
+            <if test="name!=null and name!='' ">
+                and name=#{name}
+            </if>
+            <if test="age>0">
+                and age > #{age}
+            </if>
+        </where>
+    </select>
+
+    <!--foreach使用1 ，List<Integer>-->
+    <select id="selectForeachOne" resultType="ncu.chenyuhan.domain.Student">
+        select * from student where id in
+        <foreach collection="list" item="myid" open="(" close=")" separator=",">
+            #{myid}
+        </foreach>
+    </select>
+
+
+    <select id="selectForeachTwo" resultType="ncu.chenyuhan.domain.Student">
+        select * from student where id in
+        <foreach collection="list" item="stu" open="(" close=")" separator=",">
+            #{stu.id}
+        </foreach>
+    </select>
+
+    <!--
+    <select id="selectForeachTwo" resultType="ncu.chenyuhan.domain.Student">
+        select * from student where id in (
+        <foreach collection="list" item="stu" separator=",">
+            #{stu.id}
+        </foreach>
+        )
+    </select>
+    这样比较灵活的方法也可以
+    -->
+</mapper>
+        <!--
+    sql映射文件(sql mapper)：写sql语句，mybatis会执行这些sql
+    1.指定约束文件
+    <!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+       mybatis-3-mapper.dtd是约束文件的名称，扩展名是dtd的
+     2.约束文件作用：限制，检查在当前文件中出现的标签，属性必须符合mybatis的要求
+     3.mapper是当前文件的根标签，必须的
+       namespace:叫做命名空间，唯一值的，可以是自定义的字符串，要求使用dao接口的全限定名称
+     4.在当前文件中，可以使用特定的标签，表示数据库的特定操作
+       <select>:表示执行查询，select语句
+       <update>:表示更新数据库的操作，就是在<update>标签中写的是update sql语句
+       <insert>:表示插入，放的是insert语句
+       <delete>:表示删除，执行的是delete语句
+
+-->
